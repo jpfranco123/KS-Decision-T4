@@ -1,0 +1,5 @@
+columns:16
+rows:12
+randomPlacementType:1
+totalAreaBill:8
+totalAreaWeight:8

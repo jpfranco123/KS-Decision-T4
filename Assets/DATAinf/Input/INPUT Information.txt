@@ -1,0 +1,49 @@
+This file explains the input parameters that must be passed In the input files.
+
+Input Files: param.txt, param2.txt, layoutParam.txt, KPInstances/i1.txt…
+
+The main structure of these files is: 
+NameOfTheVariable1:Value1
+NameOfTheVariable2:Value2
+…
+
+layoutParam.txt
+Relevant Parameters for the layout of the screen. All Variables must be INTEGERS.
+columns:=number of columns in the grid were to lay randomly the items.
+rows:= number of rows in the grid were to lay randomly the items.
+randomPlacementType:=The method to be used to place items randomly on the grid.
+	1:Choose random positions from full grid. It might happen that no placement is 		found and the trial will be skipped.
+	2. Choose randomly out of 10 positions. A placement is guaranteed. For this 		placement type it must be that columns=16 and rows=12. Alternatively, delete these 	variables from the layout.txt file
+totalAreaBill:=The total area of all the value items. A good initialisation for this 		variables is the number of items plus 1.
+totalAreaWeight:=The total area of all the weight items. A good initialisation for this 	variables is the number of items plus 1.
+
+
+param.txt
+Relevant Parameters of the task. All Variables must be INTEGERS or vectors of INTEGERS.
+timeRest1min:=Minimum time for the randomised inter-trial Break.
+timeRest1max:=Maximum time for the randomised inter-trial Break.
+timeRest2:=Time for the inter-blocks Break.
+timeTrial:=Time given for each trial (The total time the items are shown -With and without 	the question-).
+timeOnlyItems:=Time in which the items are shown without the question. It should be less than 	timeTrial.
+timeAnswer:=Time given to answer.
+
+param2.txt 
+Variables can be allocated between param.txt and param2.txt with no effect on the game; however there must not be repeated definitions of variables. The distinction is done because param2.txt is an output from the instance selection program (e.g python).
+numberOfInstances:=Number of instances to be imported. The files uploaded are 			automatically i1-i”numberOfInstances”
+numberOfBlocks:=Number of blocks.
+numberOfTrials:=Number of trials in each block.
+instanceRandomization:=Sequence of instances to be randomised. The vector must have length: 	trials*blocks. E.g. [1,3,2,3,1,3,1,2,3,1] for 2 blocks of 5 trials.
+
+
+KPInstances/i1.txt,KPInstances/i2.txt,…
+Instance information. Each file is a different instance of the Knapsack problem. 
+Files must be added sequentially (i.e. 1,2,3,…). All Variables must be INTEGERS or vectors of INTEGERS.
+Weights and values must be vectors with the same length. InstanceType should be allocated according to one of the levels of difficulty. Sample Instance:
+
+weights:[17,18,9,14,15,15]
+values:[14,11,14,5,14,10]
+capacity:48
+profit:46
+problemID:93-0.44-0.6
+instanceType:1
+

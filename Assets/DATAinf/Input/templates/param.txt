@@ -1,0 +1,6 @@
+timeRest1min:4
+timeRest1max:4
+timeRest2:5
+timeTrial:10
+timeAnswer:3
+timeOnlyItems:5

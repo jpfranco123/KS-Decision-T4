@@ -19,12 +19,6 @@ public class BoardManager : MonoBehaviour {
 	public static int columns = 16;
 	public static int rows = 12;
 
-	//The item radius. This is used to avoid superposition of items.
-	//public static float KSItemRadius = 1.5f;
-
-	//Timer width
-	//public static float timerWidth =400;
-
 	//The method to be used to place items randomly on the grid.
 	//1. Choose random positions from full grid. It might happen that no placement is found and the trial will be skipped.
 	//2. Choose randomly out of 10 positions. A placement is guaranteed
@@ -148,7 +142,6 @@ public class BoardManager : MonoBehaviour {
 		if (randomYes == 1) {
 			btnLeft.GetComponentInChildren<Text>().text = "No";
 			btnRight.GetComponentInChildren<Text>().text = "Yes";
-			//btnLeft.onClick.AddListener(()=>GameManager.changeToNextScene(0));
 		} else {
 			btnLeft.GetComponentInChildren<Text>().text = "Yes";
 			btnRight.GetComponentInChildren<Text>().text = "No";
@@ -161,12 +154,6 @@ public class BoardManager : MonoBehaviour {
 	//3. The instance prefab is uploaded
 	void setKSInstance(){
 		int randInstance = GameManager.instanceRandomization[GameManager.TotalTrials-1];
-
-//		Text Quest = GameObject.Find("Question").GetComponent<Text>();
-//		String question = "Can you obtain at least $" + GameManager.ksinstances[randInstance].profit + " with at most " + GameManager.ksinstances[randInstance].capacity +"kg?";
-//		Quest.text = question;
-
-		//question = "Can you pack $" + GameManager.ksinstances[randInstance].profit + " if your capacity is " + GameManager.ksinstances[randInstance].capacity +"kg?";
 		question = "$" + GameManager.ksinstances[randInstance].profit + System.Environment.NewLine + GameManager.ksinstances[randInstance].capacity +"kg?";
 
 		ws = GameManager.ksinstances [randInstance].weights;
@@ -209,14 +196,6 @@ public class BoardManager : MonoBehaviour {
 		bill.GetComponentInChildren<Text>().text = "$" + vs[itemNumber];
 		weight.GetComponentInChildren<Text>().text = "" + ws[itemNumber]+ "kg";
 
-		// This calculates area accrding to approach 1
-//		float areaItem1 = minAreaBill + (totalAreaBill - vs.Length * minAreaBill) * vs [itemNumber] / vs.Sum ();
-//		float scale1 = Convert.ToSingle (Math.Sqrt (areaItem1) - 1);
-//		bill.transform.localScale += new Vector3 (scale1, scale1, 0);
-//		float areaItem2 = minAreaWeight + (totalAreaWeight - ws.Length * minAreaWeight) * ws [itemNumber] / ws.Sum ();
-//		float scale2 = Convert.ToSingle (Math.Sqrt (areaItem2) - 1);
-//		weight.transform.localScale += new Vector3 (scale2, scale2, 0);
-
 		// Calculates the area of the Value and Weight sections of the item accrding to approach 2 and then Scales the sections so they match the corresponding area.
 		//Area Approach 2 calculation general idea:
 		//The total area is constant. The area is divided among the items propotional to the ratio between the value (weight) and the sum of all the values (weights) of the items. 
@@ -233,10 +212,6 @@ public class BoardManager : MonoBehaviour {
 		weight.transform.localScale += new Vector3 (scale2, scale2, 0);
 			
 		//Using the scaling results it calculates the coordinates (with respect to the center of the item) of the item.
-//		float weightH = weight.GetComponent<BoxCollider2D> ().size.y;
-//		float weightW = weight.GetComponent<BoxCollider2D> ().size.x;
-//		float valueH = bill.GetComponent<BoxCollider2D> ().size.y;
-//		float valueW = bill.GetComponent<BoxCollider2D> ().size.x;
 		float weightH = weight.GetComponent<BoxCollider2D> ().size.y*weight.transform.localScale.y;
 		float weightW = weight.GetComponent<BoxCollider2D> ().size.x*weight.transform.localScale.x;
 		float valueH = bill.GetComponent<BoxCollider2D> ().size.y*bill.transform.localScale.y;
@@ -244,10 +219,6 @@ public class BoardManager : MonoBehaviour {
 
 		Item itemInstance = new Item();
 		itemInstance.gameItem=instance;
-//		itemInstance.coordValue1=new Vector2(-valueW*(1+scale1)/2,0);
-//		itemInstance.coordValue2=new Vector2(valueW*(1+scale1)/2,valueH*(1+scale1));
-//		itemInstance.coordWeight1=new Vector2(-weightW*(1+scale2)/2,0);
-//		itemInstance.coordWeight2=new Vector2(weightW*(1+scale2)/2,-weightH*(1+scale2));
 
 		itemInstance.coordValue1=new Vector2(-valueW/2,0);
 		itemInstance.coordValue2=new Vector2(valueW/2,valueH);
@@ -333,11 +304,6 @@ public class BoardManager : MonoBehaviour {
 					Destroy(item);
 				}
 
-//				foreach (Item item in items)
-//				{
-//					Destroy(item.gameItem);
-//				}
-
 				InitialiseList ();
 				//seeGrid();
 				itemsPlaced = LayoutObjectAtRandom ();
@@ -361,18 +327,6 @@ public class BoardManager : MonoBehaviour {
 		}
 
 	}
-
-//	//Checks if positioning an item in the new position generates an overlap. Assuming the new item has a radius of KSITemRadius.
-//	//Returns: TRUE if there is an overlap. FALSE Otherwise.
-//	bool objectOverlapsQ(Vector3 pos)
-//	{
-//		//If physics could be started before update we could use the following easier function:
-//		//bool overlap = Physics2D.IsTouchingLayers(newObject.GetComponent<Collider2D>());
-//
-//		bool overlap = Physics2D.OverlapCircle(pos,KSItemRadius);
-//		return overlap;
-//
-//	}
 
 	//Checks if positioning an item in the new position generates an overlap.
 	//Returns: TRUE if there is an overlap. FALSE Otherwise.
@@ -406,7 +360,7 @@ public class BoardManager : MonoBehaviour {
 		if (GameManager.escena == "Trial") {
 			if (Input.GetKeyDown (KeyCode.UpArrow)) {
 				GameManager.saveTimeStamp("ParticipantSkip");
-				GameManager.changeToNextScene (0,0);
+				GameManager.changeToNextScene (0, 0, 1);
 			}
 		}
 		else if (GameManager.escena == "TrialAnswer") 
@@ -415,48 +369,44 @@ public class BoardManager : MonoBehaviour {
 			if (randomYes == 1) {
 				if (Input.GetKeyDown (KeyCode.LeftArrow)) {
 					//Left
-					//GameManager.changeToNextScene (0, randomYes);
 					keysON = false;
 					answer=0;
 					GameObject boto = GameObject.Find("LEFTbutton") as GameObject;
 					highlightButton(boto);
-					GameManager.changeToNextScene (0,1);
+					GameManager.changeToNextScene (0,1, 2);
 					} 
 				else if (Input.GetKeyDown (KeyCode.RightArrow)) {
 					//Right
-					//GameManager.changeToNextScene (1, randomYes);
 					keysON = false;
 					answer=1;
 					GameObject boto = GameObject.Find("RIGHTbutton") as GameObject;
 					highlightButton(boto);
-					GameManager.changeToNextScene (1,1);
+					GameManager.changeToNextScene (1,1, 2);
 					}
 			} 
 			else if (randomYes == 0) {
 				if (Input.GetKeyDown (KeyCode.LeftArrow)) {
 					//Left
-					//GameManager.changeToNextScene (1, randomYes);
 					keysON = false;
 					answer=1;
 					GameObject boto = GameObject.Find("LEFTbutton") as GameObject;
 					highlightButton(boto);
-					GameManager.changeToNextScene (1,0);
+					GameManager.changeToNextScene (1,0,2);
 					} 
 				else if (Input.GetKeyDown (KeyCode.RightArrow)) {
 					//Right
-					//GameManager.changeToNextScene (0, randomYes);
 					keysON = false;
 					answer = 0;
 					GameObject boto = GameObject.Find("RIGHTbutton") as GameObject;
 					highlightButton(boto);
-					GameManager.changeToNextScene (0,0);
+					GameManager.changeToNextScene (0,0,2);
 				}
 			}
 		} 
 		else if (GameManager.escena == "SetUp") {
 			if (Input.GetKeyDown (KeyCode.Space)) {
 				GameManager.setTimeStamp ();
-				GameManager.changeToNextScene (0,0);
+				GameManager.changeToNextScene (0,0,2);
 			}
 		}
 	}
@@ -468,44 +418,70 @@ public class BoardManager : MonoBehaviour {
 
 	}
 
-	public void setupInitialScreen(){
-
-		//Button 
+	public void setupInitialScreen()
+	{
+		//Button
+		Debug.Log("Start button");
 		GameObject start = GameObject.Find("Start") as GameObject;
 		start.SetActive (false);
 
-		//start.btnLeft.GetComponentInChildren<Text>().text = "No";
+		Debug.Log("Rand button");
+		GameObject rand = GameObject.Find("RandomisationID") as GameObject;
+		rand.SetActive (false);
 
+		//Participant Input
 		InputField pID = GameObject.Find ("ParticipantID").GetComponent<InputField>();
 
 		InputField.SubmitEvent se = new InputField.SubmitEvent();
 		//se.AddListener(submitPID(start));
-		se.AddListener((value)=>submitPID(value,start));
+		se.AddListener((value)=>submitPID(value,start,rand));
 		pID.onEndEdit = se;
 
 
-		//pID.onSubmit.AddListener((value) => submitPID(value));
+		//Randomisation Input
+		InputField rID = rand.GetComponent<InputField>();
+
+		InputField.SubmitEvent se2 = new InputField.SubmitEvent();
+		se2.AddListener((value)=>submitRandID(value,start));
+		rID.onEndEdit = se2;
+
 
 	}
 
-	private void submitPID(string pIDs, GameObject start){
-
-		//Debug.Log (pIDs);
-
+	private void submitPID(string pIDs, GameObject start, GameObject rand)
+	{
 		GameObject pID = GameObject.Find ("ParticipantID");
+		GameObject pIDT = GameObject.Find ("ParticipantIDText");
 		pID.SetActive (false);
-		GameObject pIDText = GameObject.Find ("ParticipantIDText");
-		pIDText.SetActive (false);
+
+		Text inputID = pIDT.GetComponent<Text>();
+		inputID.text = "Randomisation Number";
 
 		//Set Participant ID
 		GameManager.participantID=pIDs;
 
-		//Activate Start Button and listener
-		//GameObject start = GameObject.Find("Start");
-		start.SetActive (true);
-		keysON = true;
+		//Activate Randomisation Listener
+		rand.SetActive (true);
 
 	}
+
+	private void submitRandID(string rIDs, GameObject start)
+	{
+		//Debug.Log (pIDs);
+
+		GameObject rID = GameObject.Find ("RandomisationID");
+		GameObject pIDT = GameObject.Find ("ParticipantIDText");
+		rID.SetActive (false);
+		pIDT.SetActive (false);
+
+		//Set Participant ID
+		GameManager.randomisationID=rIDs;
+
+		//Activate Start Button and listener
+		start.SetActive (true);
+		keysON = true;
+	}
+		
 
 	public static string getItemCoordinates(){
 		string coordinates = "";

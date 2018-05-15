@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Random = UnityEngine.Random;
+using UnityEditor;
 //using System.Diagnostics;
 
 public class GameManager : MonoBehaviour {
@@ -27,6 +28,9 @@ public class GameManager : MonoBehaviour {
 	//Otherwise they are rewritten (see loadParameters() )
 	//Total time for these scene
 	public static float totalTime;
+
+	//Time spent at the instance
+	public static float timeSkip;
 
 	//Current trial initialization
 	public static int trial = 0;
@@ -73,12 +77,15 @@ public class GameManager : MonoBehaviour {
 	//This is the string that will be used as the file name where the data is stored. DeCurrently the date-time is used.
 	public static string participantID = "Empty";
 
+	//This is the randomisation number (#_param2.txt that is to be used for oder of instances for this participant)
+	public static string randomisationID = "Empty";
+
 	public static string dateID = @System.DateTime.Now.ToString("dd MMMM, yyyy, HH-mm");
 
 	private static string identifierName;
 
 	//Is the question shown on scene 1?
-	private static int questionOn;
+	//private static int questionOn;
 
 	//Input and Outout Folders with respect to the Application.dataPath;
 	private static string inputFolder = "/DATAinf/Input/";
@@ -152,13 +159,8 @@ public class GameManager : MonoBehaviour {
 		if (escena == "SetUp") {
 			//Only uploads parameters and instances once.
 			block++;
-			loadParameters ();
-			loadKPInstance ();
-
-			//RandomizeKSInstances ();
 			randomizeButtons ();
 			boardScript.setupInitialScreen ();
-			//SceneManager.LoadScene (1);
 
 		} else if (escena == "Trial") {
 			trial++;
@@ -168,8 +170,6 @@ public class GameManager : MonoBehaviour {
 
 			tiempo = timeQuestion;
 			totalTime = timeQuestion;
-
-			questionOn = 1;
 
 		} else if (escena == "TrialAnswer") {
 			showTimer = true;
@@ -347,22 +347,16 @@ public class GameManager : MonoBehaviour {
 	 * The instances are stored as ksinstances structures in the array of structures: ksinstances
 	 */
 	public static void loadKPInstance(){
-		//string folderPathLoad = Application.dataPath.Replace("Assets","") + "DATA/Input/KPInstances/";
 		string folderPathLoad = Application.dataPath + inputFolderKSInstances;
-//		int linesInEachKPInstance = 4;
 		ksinstances = new KSInstance[numberOfInstances];
 
 		for (int k = 1; k <= numberOfInstances; k++) {
 
 			var dict = new Dictionary<string, string>();
-//			string[] KPInstanceText = new string[linesInEachKPInstance];
+
 			try {   // Open the text file using a stream reader.
 				using (StreamReader sr = new StreamReader (folderPathLoad + "i"+ k +".txt")) {
-//					for (int i = 0; i < linesInEachKPInstance; i++) {
-//						string line = sr.ReadLine ();
-//						string[] dataInLine = line.Split (':');
-//						KPInstanceText [i] = dataInLine [1];
-//					}
+
 					string line;
 					while (!string.IsNullOrEmpty((line = sr.ReadLine())))
 					{
@@ -408,9 +402,10 @@ public class GameManager : MonoBehaviour {
 	}
 
 	//Loads the parameters form the text files: param.txt and layoutParam.txt
-	void loadParameters(){
+	private static void loadParameters(){
 		//string folderPathLoad = Application.dataPath.Replace("Assets","") + "DATA/Input/";
 		string folderPathLoad = Application.dataPath + inputFolder;
+		string folderPathLoadInstances = Application.dataPath + inputFolderKSInstances;
 		var dict = new Dictionary<string, string>();
 
 		try {   // Open the text file using a stream reader.
@@ -441,8 +436,14 @@ public class GameManager : MonoBehaviour {
 					dict.Add(tmp[0], tmp[1]);//int.Parse(dict[tmp[1]]);
 				}
 			}
+		} catch (Exception e) {
+			Debug.Log ("The file could not be read:");
+			Debug.Log (e.Message);
+		}
 
-			using (StreamReader sr2 = new StreamReader (folderPathLoad + "param2.txt")) {
+
+		try {
+			using (StreamReader sr2 = new StreamReader (folderPathLoadInstances + randomisationID  + "_param2.txt")) {
 
 				// (This loop reads every line until EOF or the first blank line.)
 				string line2;
@@ -455,10 +456,11 @@ public class GameManager : MonoBehaviour {
 					dict.Add(tmp[0], tmp[1]);//int.Parse(dict[tmp[1]]);
 				}
 			}
-
 		} catch (Exception e) {
-			Debug.Log ("The file could not be read:");
+			Debug.Log ("The randomisation file could not be read. Perhaps it doesn't exist.");
 			Debug.Log (e.Message);
+			EditorUtility.DisplayDialog ("The randomisation file could not be read.", e.Message,"Got it! I'll restart the game.");
+
 		}
 
 		assignVariables(dict);
@@ -466,7 +468,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	//Assigns the parameters in the dictionary to variables
-	void assignVariables(Dictionary<string,string> dictionary){
+	private static void assignVariables(Dictionary<string,string> dictionary){
 
 		//Assigns Parameters
 		string timeRest1minS;
@@ -519,42 +521,23 @@ public class GameManager : MonoBehaviour {
 
 		////Assigns LayoutParameters
 		string randomPlacementTypeS;
-		//string resolutionWidthS;
-		//string resolutionHeightS;
 		string columnsS;
 		string rowsS;
-		//string KSItemRadiusS;
 		string totalAreaBillS;
 		string totalAreaWeightS;
 
 		dictionary.TryGetValue ("randomPlacementType", out randomPlacementTypeS);
-		//dictionary.TryGetValue ("resolutionWidth", out resolutionWidthS);
-		//dictionary.TryGetValue ("resolutionHeight", out resolutionHeightS);
+
 		dictionary.TryGetValue ("columns", out columnsS);
 		dictionary.TryGetValue ("rows", out rowsS);
 		dictionary.TryGetValue ("totalAreaBill", out totalAreaBillS);
 		dictionary.TryGetValue ("totalAreaWeight", out totalAreaWeightS);
 
-		//dictionary.TryGetValue ("KSItemRadius", out KSItemRadiusS);
-
 		BoardManager.randomPlacementType = Int32.Parse(randomPlacementTypeS);
-
-		//BoardManager.resolutionWidth=Int32.Parse(resolutionWidthS);
-		//BoardManager.resolutionHeight=Int32.Parse(resolutionHeightS);
 		BoardManager.columns=Int32.Parse(columnsS);
 		BoardManager.rows=Int32.Parse(rowsS);
 		BoardManager.totalAreaBill=Int32.Parse(totalAreaBillS);
 		BoardManager.totalAreaWeight=Int32.Parse(totalAreaWeightS);
-		//BoardManager.KSItemRadius=Convert.ToSingle(KSItemRadiusS);//Int32.Parse(KSItemRadiusS);
-	}
-
-	//66: Wrong function: items are repeated.
-	//Randomizes the sequence of Instances to be shown to the participant adn stores it in: instanceRandomization
-	void RandomizeKSInstances(){
-		instanceRandomization = new int[numberOfTrials*numberOfBlocks];
-		for (int i = 0; i < numberOfTrials*numberOfBlocks; i++) {
-				instanceRandomization[i] = Random.Range(0,numberOfInstances);
-		}
 	}
 
 	//Randomizes The Location of the Yes/No button for a whole block.
@@ -579,28 +562,26 @@ public class GameManager : MonoBehaviour {
 		}
 
 	}
-
-//	//Saves and Changes to the next trial
-//	public static void changeToNextTrial(int newKPInstance, int answer){
-//		save (answer, timeTrial-tiempo);
-//		SceneManager.LoadScene(newKPInstance);
-//	}
-
-
+		
 	//Takes care of changing the Scene to the next one (Except for when in the setup scene)
-	public static void changeToNextScene(int answer, int randomYes){
+	public static void changeToNextScene(int answer, int randomYes, int skipped){
 		BoardManager.keysON = false;
 		if (escena == "SetUp") {
+			loadParameters ();
+			loadKPInstance ();
 			saveHeaders ();
 			SceneManager.LoadScene ("Trial");
 		}
 		else if (escena == "Trial") {
+			if (skipped == 1) {
+				timeSkip = timeQuestion - tiempo;
+			} else {
+				timeSkip = timeQuestion;
+			}
 			SceneManager.LoadScene ("TrialAnswer");
 		} else if (escena == "TrialAnswer") {
-			if (answer == 2) {
-				save (answer, timeQuestion, randomYes, "");
-			} else {
-				save (answer, timeAnswer - tiempo, randomYes, "");
+			save (answer, timeSkip, randomYes, "");
+			if (answer != 2) {
 				saveTimeStamp ("ParticipantAnswer");
 			}
 			SceneManager.LoadScene ("InterTrialRest");
@@ -657,10 +638,6 @@ public class GameManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The time elapsed in milliseconds since the "setTimeStamp()".</returns>
 	private static string timeStamp(){
-//		TimeSpan ts = stopWatch.Elapsed;
-//		string stamp = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-//			ts.Hours, ts.Minutes, ts.Seconds,
-//			ts.Milliseconds / 10);
 		long milliSec = stopWatch.ElapsedMilliseconds;
 		string stamp = milliSec.ToString();
 		return stamp;
@@ -674,18 +651,15 @@ public class GameManager : MonoBehaviour {
 		//Debug.Log (tiempo);
 		if (showTimer) {
 			boardScript.updateTimer();
-//			RectTransform timer = GameObject.Find ("Timer").GetComponent<RectTransform> ();
-//			timer.sizeDelta = new Vector2 (timerWidth * (tiempo / timeTrial), timer.rect.height);
 		}
 
 		//When the time runs out:
 		if(tiempo < 0)
 		{
-			//changeToNextScene(2,BoardManager.randomYes);
-				changeToNextScene(BoardManager.answer,BoardManager.randomYes);
-			}
-
+				changeToNextScene(BoardManager.answer,BoardManager.randomYes,0);
 		}
+
+	}
 
 
 }
